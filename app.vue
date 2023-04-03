@@ -5,16 +5,19 @@
 			<header class="mb-8 border-b py-4">
 				<div class="container flex justify-between items-center">
 					<div>
-						<p v-if="user">
-							{{ user ? `Hi, ${user.username}!` : 'Unauthenticated.' }}
-						</p>
-
 						<NuxtLink :to="{ name: 'index' }">Home</NuxtLink>
 						&nbsp;|&nbsp;
 						<NuxtLink :to="{ name: 'settings' }">Settings</NuxtLink>
 					</div>
 
-					<button v-if="user" @click="handleSignOut">Sign out</button>
+					<div class="flex items-center gap-4">
+						<p v-if="user" class="m-0">
+							{{ user ? `Hi, ${user.username}!` : 'Unauthenticated.' }}
+						</p>
+						<button v-if="user" class="m-0" @click="handleSignOut">
+							Sign out
+						</button>
+					</div>
 				</div>
 			</header>
 			<main class="container">
