@@ -1,0 +1,19 @@
+{
+	"name": "nuxt-app",
+	"private": true,
+	"scripts": {
+		"build": "nuxt build",
+		"start": "nuxt dev",
+		"preview": "nuxt preview",
+		"postinstall": "nuxt prepare"
+	},
+	"devDependencies": {
+		"@types/crypto-js": "^4.1.1",
+		"@types/imapflow": "^1.0.12",
+		"crypto-js": "^4.1.1",
+		"h3-zod": "^0.4.2",
+		"imapflow": "^1.0.125",
+		"nuxt": "^3.3.2",
+		"zod": "^3.21.4"
+	}
+}
