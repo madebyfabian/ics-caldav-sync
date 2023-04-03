@@ -6,5 +6,9 @@ export default <Partial<Config>>{
 			center: true,
 			padding: '1.25rem',
 		},
+		screens: {
+			md: '768px',
+			lg: '960px',
+		},
 	},
 }
