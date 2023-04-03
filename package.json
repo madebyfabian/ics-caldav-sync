@@ -8,12 +8,16 @@
 		"postinstall": "nuxt prepare"
 	},
 	"devDependencies": {
+		"@nuxtjs/tailwindcss": "^6.6.5",
 		"@types/crypto-js": "^4.1.1",
+		"@types/ical": "^0.8.0",
 		"@types/imapflow": "^1.0.12",
 		"crypto-js": "^4.1.1",
 		"h3-zod": "^0.4.2",
+		"ical": "^0.8.0",
 		"imapflow": "^1.0.125",
 		"nuxt": "^3.3.2",
+		"tsdav": "^2.0.3",
 		"zod": "^3.21.4"
 	}
 }

@@ -1,22 +1,36 @@
 <template>
 	<div>
-		<h1>Auth</h1>
 		<input
+			class="block w-full"
+			type="text"
+			v-model="authInput.user.host"
+			placeholder="Host (e.g. imap.mail.de)"
+		/>
+		<input
+			class="block w-full"
+			type="number"
+			v-model.number="authInput.user.port"
+			placeholder="Port (e.g. 993)"
+		/>
+		<input
+			class="block w-full"
 			type="email"
 			v-model="authInput.user.username"
 			placeholder="E-Mail"
 		/>
-		<br /><br />
 		<input
+			class="block w-full"
 			type="password"
 			v-model="authInput.user.password"
 			placeholder="Password"
 		/>
-		<br />
-		<br />
-		<pre>{{ authInput.user }}</pre>
-		<br /><br />
-		<button @click="handleAuth">
+
+		<label>
+			<input type="checkbox" v-model="authInput.user.secure" />
+			Secure?
+		</label>
+
+		<button class="w-full mt-8" @click="handleAuth">
 			{{ authPending ? 'Loading...' : 'Auth now' }}
 		</button>
 
@@ -29,11 +43,8 @@
 <script setup lang="ts">
 	import type { ImapAuthBody } from '@/server/api/imap/auth.post'
 
-	const { user, setUser } = useUser()
-
-	watchEffect(() => {
-		if (user.value) return navigateTo({ name: 'index' })
-	})
+	const runtimeConfig = useRuntimeConfig()
+	const { setUser } = useUser()
 
 	const authPending = ref(false)
 	const authError = ref<unknown | null>(null)
@@ -42,13 +53,14 @@
 			host: 'imap.mail.de',
 			port: 993,
 			secure: true,
-			username: '',
-			password: '',
+			username: runtimeConfig.public.debugPrefillImapUsername || '',
+			password: runtimeConfig.public.debugPrefillImapPassword || '',
 		},
 	})
 
 	const handleAuth = async () => {
 		authPending.value = true
+		authError.value = null
 		try {
 			const data = await $fetch('/api/imap/auth', {
 				method: 'POST',

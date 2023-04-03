@@ -1,5 +1,6 @@
 import type { User } from '@/server/api/imap/auth.post'
 import type { UserConfig } from '@/server/api/imap/config.post'
+import type { DavUser } from '@/server/api/dav/auth.post'
 
 export const useUser = () => {
 	type UserState = User | null
@@ -14,10 +15,18 @@ export const useUser = () => {
 		userConfig.value = newConfig
 	}
 
+	type DavUserState = DavUser | null
+	const davUser = useState<DavUserState>('davUser', () => null)
+	const setDavUser = (newDavUser: DavUserState) => {
+		davUser.value = newDavUser
+	}
+
 	return {
 		user: readonly(user),
 		setUser,
 		userConfig: readonly(userConfig),
 		setUserConfig,
+		davUser: readonly(davUser),
+		setDavUser,
 	}
 }

@@ -1,8 +1,4 @@
 import { zh, z } from 'h3-zod'
-import {
-	getUserConfigFromCookie,
-	defaultCookieParameters,
-} from '@/server/utils'
 
 const bodyObj = z.object({
 	config: z.object({
@@ -19,7 +15,7 @@ export type UserConfig = ImapConfigBody['config']
 export default defineEventHandler(async event => {
 	try {
 		const body = await zh.useValidatedBody(event, bodyObj)
-		const userConfig = getUserConfigFromCookie({ event })
+		const userConfig = getSafeUserConfigFromCookie({ event })
 
 		const newUserConfig: UserConfig = {
 			...userConfig,
