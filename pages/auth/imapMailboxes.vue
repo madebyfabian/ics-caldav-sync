@@ -12,6 +12,10 @@
 <script setup lang="ts">
 	const { userConfig } = useUser()
 
+	definePageMeta({
+		layout: 'auth',
+	})
+
 	watchEffect(() => {
 		if (userConfig.value) return navigateTo({ name: 'auth-dav' })
 	})

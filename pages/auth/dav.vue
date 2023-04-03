@@ -12,6 +12,10 @@
 <script setup lang="ts">
 	const { davUser } = useUser()
 
+	definePageMeta({
+		layout: 'auth',
+	})
+
 	watchEffect(() => {
 		if (davUser.value) return navigateTo({ name: 'index' })
 	})

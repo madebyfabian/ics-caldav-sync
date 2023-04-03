@@ -1,25 +1,30 @@
 <template>
-	<div>
+	<div v-if="!pending">
 		<h1>Hi, {{ user?.username }}!</h1>
 
 		<p>The following inboxes are being checked:</p>
-
-		<ul
-			v-if="Array.isArray(userConfig?.mailboxesPaths)"
-			class="bg-gray-100 p-4 rounded-2xl"
-		>
-			<li v-for="mailboxPath of userConfig?.mailboxesPaths" :key="mailboxPath">
-				{{ mailboxPath }}
-			</li>
-		</ul>
-		<div v-else>None.</div>
-
-		<p>Check your mailboxes for any emails with .ics</p>
-
 		<div class="bg-gray-100 p-4 my-4 rounded-2xl">
-			<ul v-if="checkRes?.messages?.length" class="list-none">
+			<ul
+				v-if="
+					Array.isArray(userConfig?.mailboxesPaths) &&
+					userConfig?.mailboxesPaths.length
+				"
+			>
 				<li
-					v-for="message in checkRes.messages"
+					v-for="mailboxPath of userConfig?.mailboxesPaths"
+					:key="mailboxPath"
+				>
+					{{ mailboxPath }}
+				</li>
+			</ul>
+			<div v-else>None.</div>
+		</div>
+
+		<p class="mt-8">Check your mailboxes for any emails with .ics</p>
+		<div class="bg-gray-100 p-4 my-4 rounded-2xl">
+			<ul v-if="data?.messages?.length" class="list-none">
+				<li
+					v-for="message in data.messages"
 					class="flex items-start gap-4 group/listItem"
 				>
 					<span
@@ -41,13 +46,10 @@
 			<div v-else>Nothing here.</div>
 		</div>
 	</div>
+	<div v-else>Loading...</div>
 </template>
 
 <script setup lang="ts">
 	const { user, userConfig } = useUser()
-
-	const fetchCheckMailboxesRes = await $fetch('/api/imap/checkMailboxes')
-	type Res = Awaited<typeof fetchCheckMailboxesRes>
-
-	const checkRes = ref<Res | null>(fetchCheckMailboxesRes)
+	const { data, pending } = useLazyFetch('/api/imap/checkMailboxes')
 </script>

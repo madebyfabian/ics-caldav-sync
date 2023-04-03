@@ -12,6 +12,10 @@
 <script setup lang="ts">
 	const { user } = useUser()
 
+	definePageMeta({
+		layout: 'auth',
+	})
+
 	watchEffect(() => {
 		if (user.value) return navigateTo({ name: 'auth-imapMailboxes' })
 	})
