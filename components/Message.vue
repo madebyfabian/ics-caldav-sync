@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 	import type { DavActionBody } from '@/server/api/dav/action.post'
-	import type { MessageResObj } from '@/server/api/imap/listMessages'
+	import type { MessageResObj } from '@/server/utils'
 
 	const props = defineProps<{
 		message: MessageResObj
@@ -44,13 +44,7 @@
 			imapMessage: {
 				uid: props.message.uid,
 				mailboxPath: props.message.mailboxPath,
-			},
-			icsAttachment: {
-				content: props.message.attachments?.[0].content || '',
-				calMeta: {
-					uid: String(props.message.attachments?.[0].calMeta?.uid || ''),
-					status: String(props.message.attachments?.[0].calMeta?.status || ''),
-				},
+				attachmentChildNodes: props.message.attachmentChildNodes,
 			},
 		}
 

@@ -1,13 +1,9 @@
-import ical, { type CalendarComponent } from 'ical'
-import type {
-	MessageStructureObject,
-	FetchMessageObject,
-	ImapFlow,
-} from 'imapflow'
+import type { MessageStructureObject } from 'imapflow'
 import {
 	getUserFromCookie,
 	getSafeUserConfigFromCookie,
 	getSafeImapProcessedMessageFromCookie,
+	type MessageResObj,
 } from '@/server/utils'
 
 const getDeepIcsChildNodes = ({
@@ -32,59 +28,6 @@ const getDeepIcsChildNodes = ({
 	return nodes
 }
 
-const downloadIcsAttachments = async ({
-	messageData,
-	client,
-}: {
-	messageData: MessageResObj
-	client: ImapFlow
-}) => {
-	if (!messageData._icsAttachmentNodes) return null
-
-	const downloadsPromises = messageData._icsAttachmentNodes.map(node =>
-		client.download(`${messageData.uid}`, node.part, { uid: true })
-	)
-	const downloadsRes = await Promise.allSettled(downloadsPromises)
-
-	const attachments: AttachmentResObj[] = []
-	for (const downloadRes of downloadsRes) {
-		if (downloadRes.status !== 'fulfilled') continue
-		const { meta, content } = downloadRes.value
-		if (!meta) continue
-
-		// Parse buffer
-		let result = ''
-		for await (const chunk of content) {
-			result += chunk
-		}
-
-		// Parse to ical
-		const icalData = ical.parseICS(result)
-		const calMeta = Object.values(icalData).find(key => key.type === 'VEVENT')
-
-		attachments.push({
-			content: result,
-			calMeta: calMeta,
-		})
-	}
-
-	return attachments
-}
-
-export type AttachmentResObj = {
-	content: string
-	calMeta: CalendarComponent | undefined
-}
-
-export type MessageResObj = {
-	uid: FetchMessageObject['uid']
-	envelope: FetchMessageObject['envelope']
-	flags: string[]
-	attachments: AttachmentResObj[] | null
-	mailboxPath: string
-	_icsAttachmentNodes?: MessageStructureObject[]
-}
-
 /**
  * - Fetch mailbox & all messages in mailbox
  * - Filter out messages that don't have an ICS attachment
@@ -102,7 +45,7 @@ export default defineEventHandler(async event => {
 		let messages: MessageResObj[] = []
 
 		for (const mailboxPath of userConfig.mailboxesPaths || []) {
-			let lock = await client.getMailboxLock(mailboxPath)
+			let mailboxLock = await client.getMailboxLock(mailboxPath)
 
 			try {
 				// Fetch and collect messages
@@ -132,27 +75,12 @@ export default defineEventHandler(async event => {
 						envelope: message.envelope,
 						flags: [...message.flags],
 						mailboxPath,
-						attachments: null,
-						_icsAttachmentNodes: icsAttachmentNodes,
+						attachmentChildNodes: icsAttachmentNodes,
 					})
 				}
 			} finally {
 				// Make sure lock is released, otherwise next `getMailboxLock()` never returns
-				lock.release()
-			}
-
-			// Download ical
-			for (let messageData of messages) {
-				try {
-					messageData.attachments = await downloadIcsAttachments({
-						messageData,
-						client,
-					})
-
-					delete messageData._icsAttachmentNodes
-				} catch (error) {
-					console.error(error)
-				}
+				mailboxLock.release()
 			}
 
 			// log out and close connection

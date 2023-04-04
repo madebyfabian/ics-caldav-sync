@@ -4,18 +4,17 @@ import {
 	upsertSafeImapProcessedMessages,
 } from '@/server/utils'
 import { davClient, transformUidToFileName } from '@/server/utils/dav'
+import { safeDownloadIcsAttachments } from '~~/server/utils/imapFlow'
 
 const bodyObj = z.object({
 	imapMessage: z.object({
 		mailboxPath: z.string(),
 		uid: z.number(),
-	}),
-	icsAttachment: z.object({
-		content: z.string(),
-		calMeta: z.object({
-			uid: z.string(),
-			status: z.string(),
-		}),
+		attachmentChildNodes: z.array(
+			z.object({
+				part: z.string(),
+			})
+		),
 	}),
 })
 
@@ -40,7 +39,20 @@ export default defineEventHandler(async event => {
 
 		const calendar = calendars?.[0]
 
-		const uid = body.icsAttachment.calMeta.uid
+		const attachments = await safeDownloadIcsAttachments({
+			messageData: {
+				uid: body.imapMessage.uid,
+				mailboxPath: body.imapMessage.mailboxPath,
+				attachmentChildNodes: body.imapMessage.attachmentChildNodes,
+			},
+			event,
+		})
+		const attachment = attachments?.[0]
+		if (!attachment) throw new Error('No attachment found')
+
+		const uid = attachment.calMeta.uid
+		if (!uid) throw new Error('No UID found')
+
 		const fileName = transformUidToFileName({ uid })
 
 		// Fetch all calendar objects + find the one we want to update/delete
@@ -53,7 +65,7 @@ export default defineEventHandler(async event => {
 
 		// Now check whether we want to create, update or delete the event.
 		// If the event is cancelled, we delete it.
-		switch (body.icsAttachment.calMeta.status) {
+		switch (attachment.calMeta.status) {
 			case 'CANCELLED': {
 				// Delete event
 				try {
@@ -69,7 +81,7 @@ export default defineEventHandler(async event => {
 					}
 				} catch (error) {
 					console.error(`Failed to delete calendar object`, {
-						uid: body.icsAttachment.calMeta.uid,
+						uid: attachment.calMeta.uid,
 					})
 				} finally {
 					break
@@ -85,7 +97,7 @@ export default defineEventHandler(async event => {
 							calendarObject: {
 								url: calendarObject.url,
 								etag: calendarObject.etag,
-								data: body.icsAttachment.content,
+								data: attachment.content,
 							},
 						})
 						if (updatedCalendarObject) {
@@ -94,7 +106,7 @@ export default defineEventHandler(async event => {
 						}
 					} catch (error) {
 						console.error(`Failed to update calendar object`, {
-							uid: body.icsAttachment.calMeta.uid,
+							uid: attachment.calMeta.uid,
 						})
 					}
 				} else {
@@ -102,7 +114,7 @@ export default defineEventHandler(async event => {
 					try {
 						const createdCalendarObject = await dav.createCalendarObject({
 							calendar,
-							iCalString: body.icsAttachment.content,
+							iCalString: attachment.content,
 							filename: fileName,
 						})
 						if (createdCalendarObject) {
@@ -111,7 +123,7 @@ export default defineEventHandler(async event => {
 						}
 					} catch (error) {
 						console.error(`Failed to create calendar object`, {
-							uid: body.icsAttachment.calMeta.uid,
+							uid: attachment.calMeta.uid,
 						})
 					}
 				}

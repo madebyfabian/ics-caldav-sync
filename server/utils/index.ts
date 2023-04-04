@@ -1,9 +1,24 @@
 import aes from 'crypto-js/aes'
 import utf8 from 'crypto-js/enc-utf8'
+import type { FetchMessageObject, MessageStructureObject } from 'imapflow'
+import type { CalendarComponent } from 'ical'
 import { H3Event, setCookie } from 'h3'
 import type { User } from '@/server/api/imap/auth.post'
 import type { UserConfig } from '@/server/api/imap/config.post'
 import type { DavUser } from '@/server/api/dav/auth.post'
+
+export type AttachmentResObj = {
+	content: string
+	calMeta: CalendarComponent
+}
+
+export type MessageResObj = {
+	uid: FetchMessageObject['uid']
+	envelope: FetchMessageObject['envelope']
+	flags: string[]
+	mailboxPath: string
+	attachmentChildNodes: MessageStructureObject[]
+}
 
 export const cookieNames = {
 	imapData: 'imap-user-data',
