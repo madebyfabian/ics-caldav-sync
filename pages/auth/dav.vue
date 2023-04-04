@@ -17,6 +17,6 @@
 	})
 
 	watchEffect(() => {
-		if (davUser.value) return navigateTo({ name: 'index' })
+		if (davUser.value) return navigateTo({ name: 'app' })
 	})
 </script>
