@@ -1,5 +1,5 @@
-import aes from 'crypto-js/aes'
-import utf8 from 'crypto-js/enc-utf8'
+import aes from 'crypto-js/aes.js'
+import utf8 from 'crypto-js/enc-utf8.js'
 import type { FetchMessageObject, MessageStructureObject } from 'imapflow'
 import type { CalendarComponent } from 'ical'
 import { H3Event, setCookie } from 'h3'

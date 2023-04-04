@@ -1,5 +1,5 @@
 import { zh, z } from 'h3-zod'
-import aes from 'crypto-js/aes'
+import aes from 'crypto-js/aes.js'
 import { cookieNames, defaultCookieParameters } from '@/server/utils'
 
 const bodyObj = z.object({
