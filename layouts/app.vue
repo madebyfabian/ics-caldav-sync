@@ -30,23 +30,13 @@
 
 <script setup lang="ts">
 	// Init user
-	const { user, setUser, setUserConfig, setDavUser } = useUser()
-	const { data: userData, error: userError } = await useLazyFetch(
-		'/api/imap/user'
-	)
+	const { user, userPending, setUser, setUserConfig, setDavUser } = useUser()
 
 	watchEffect(() => {
-		if (userError.value) {
+		console.log(userPending.value)
+		if (!userPending.value && !user.value) {
 			return navigateTo({ name: 'auth' })
 		}
-	})
-
-	// Only when fetch is done
-	watch([userData], () => {
-		if (!userData.value) return
-		setUser(userData.value.user)
-		setUserConfig(userData.value.userConfig)
-		setDavUser(userData.value.davUser)
 	})
 
 	const handleSignOut = async () => {
