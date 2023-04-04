@@ -3,7 +3,7 @@
 		<span
 			class="h-8 w-8 flex-shrink-0 mt-4 text-xl rounded-full flex items-center justify-center"
 			:class="[
-				isMessageSeen({ flags: message.flags })
+				!isMessageSeen({ flags: message.flags })
 					? 'bg-blue-500'
 					: 'bg-transparent',
 			]"
