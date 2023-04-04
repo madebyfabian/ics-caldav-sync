@@ -16,12 +16,8 @@ export const imapFlowClient = ({ user }: { user: User }) => {
 		logger: {
 			debug: () => {},
 			info: () => {},
-			warn: (...params) => {
-				console.warn(params)
-			},
-			error: (...params) => {
-				console.error(params)
-			},
+			warn: () => {},
+			error: () => {},
 		},
 		disableAutoIdle: true,
 	})
