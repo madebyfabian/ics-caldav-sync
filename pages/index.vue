@@ -1,9 +1,14 @@
 <template>
 	<div>
-		<h1>New messages</h1>
+		<div class="flex flex-wrap">
+			<h1 class="m-0">New messages</h1>
+			<button class="ml-auto mt-0" @click="() => refresh()">
+				{{ pending ? 'Loading...' : 'Refresh' }}
+			</button>
+		</div>
 
 		<p class="mt-8">Here are your messages with ICS attachments:</p>
-		<section class="bg-gray-50 p-4 my-4 rounded-2xl -mx-4 md:-mx-0">
+		<section class="bg-gray-50 px-4 py-2 my-4 rounded-2xl -mx-4 md:-mx-0">
 			<div v-if="!pending">
 				<div v-if="data?.messages?.length">
 					<Message

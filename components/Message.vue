@@ -1,7 +1,7 @@
 <template>
 	<div class="flex items-start gap-3 group/listItem">
 		<span
-			class="h-8 w-8 flex-shrink-0 mt-4 text-xl rounded-full flex items-center justify-center"
+			class="h-8 w-8 flex-shrink-0 mt-6 text-xl rounded-full flex items-center justify-center"
 			:class="[
 				!isMessageSeen({ flags: message.flags })
 					? 'bg-blue-500'
@@ -12,7 +12,7 @@
 		</span>
 
 		<div
-			class="flex gap-2 flex-col md:flex-row flex-1 items-start border-b group-last/listItem:border-none py-4"
+			class="flex gap-2 flex-col md:flex-row flex-1 items-start border-b group-last/listItem:border-none py-6"
 		>
 			<div class="flex-1">
 				<div class="font-semibold mb-1 leading-snug">
