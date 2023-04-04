@@ -12,3 +12,11 @@ export const davClient = async ({ davUser }: { davUser: DavUser }) => {
 		defaultAccountType: 'caldav',
 	})
 }
+
+/**
+ * Transforms a DAV UID into a filename
+ * e.g. 12345@blah.com -> 12345@blahcom.ics
+ */
+export const transformUidToFileName = ({ uid }: { uid: string }) => {
+	return `${uid.replace('.', '')}.ics`
+}

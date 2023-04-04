@@ -1,6 +1,6 @@
 import aes from 'crypto-js/aes'
 import utf8 from 'crypto-js/enc-utf8'
-import type { H3Event, setCookie } from 'h3'
+import { H3Event, setCookie } from 'h3'
 import type { User } from '@/server/api/imap/auth.post'
 import type { UserConfig } from '@/server/api/imap/config.post'
 import type { DavUser } from '@/server/api/dav/auth.post'
@@ -8,6 +8,7 @@ import type { DavUser } from '@/server/api/dav/auth.post'
 export const cookieNames = {
 	imapData: 'imap-user-data',
 	imapConfig: 'imap-user-config',
+	imapProcessedMessages: 'imap-processed-messages',
 	davData: 'dav-user-data',
 }
 
@@ -39,7 +40,8 @@ export const getUserFromCookie = ({ event }: { event: H3Event }) => {
 	}
 
 	// Try to get user data cookie
-	const userDataCookieRaw = getCookie(event, cookieNames.imapData)
+	const cookieName = cookieNames.imapData
+	const userDataCookieRaw = getCookie(event, cookieName)
 	if (!userDataCookieRaw)
 		throw createError({ statusCode: 401, statusMessage: 'No cookie set' })
 
@@ -49,7 +51,7 @@ export const getUserFromCookie = ({ event }: { event: H3Event }) => {
 	if (!decryptedUserDataRaw)
 		throw createError({
 			statusCode: 401,
-			statusMessage: 'Failed to decrypt cookie',
+			statusMessage: `Failed to decrypt cookie "${cookieName}"`,
 		})
 
 	let user = safeParse<User>(decryptedUserDataRaw)
@@ -74,6 +76,7 @@ export const getSafeUserConfigFromCookie = ({ event }: { event: H3Event }) => {
 		...parsedConfig,
 	}
 }
+
 export const getSafeDavUserFromCookie = ({ event }: { event: H3Event }) => {
 	try {
 		const passwordSalt = useRuntimeConfig()?.imapPasswordSalt
@@ -85,7 +88,8 @@ export const getSafeDavUserFromCookie = ({ event }: { event: H3Event }) => {
 		}
 
 		// Try to get user data cookie
-		const davUserDataCookieRaw = getCookie(event, cookieNames.davData)
+		const cookieName = cookieNames.davData
+		const davUserDataCookieRaw = getCookie(event, cookieName)
 		if (!davUserDataCookieRaw)
 			throw createError({ statusCode: 401, statusMessage: 'No cookie set' })
 
@@ -95,7 +99,7 @@ export const getSafeDavUserFromCookie = ({ event }: { event: H3Event }) => {
 		if (!decryptedUserDataRaw)
 			throw createError({
 				statusCode: 401,
-				statusMessage: 'Failed to decrypt cookie',
+				statusMessage: `Failed to decrypt cookie "${cookieName}"`,
 			})
 
 		let davUser = safeParse<DavUser>(decryptedUserDataRaw)
@@ -105,6 +109,88 @@ export const getSafeDavUserFromCookie = ({ event }: { event: H3Event }) => {
 		return davUser
 	} catch (error) {
 		console.error(error)
+		return null
+	}
+}
+
+type MessageUid = number
+type MailboxPath = string
+type ProcessedMessagesList = { [key: MailboxPath]: MessageUid[] }
+
+export const getSafeImapProcessedMessagesFromCookie = ({
+	event,
+}: {
+	event: H3Event
+}) => {
+	const processedMessages: ProcessedMessagesList = {}
+	const processedImapMessagesCookieRaw = getCookie(
+		event,
+		cookieNames.imapProcessedMessages
+	)
+	if (!processedImapMessagesCookieRaw) return processedMessages
+
+	let parsedProcessedMessages = safeParse<ProcessedMessagesList>(
+		processedImapMessagesCookieRaw
+	)
+	if (!parsedProcessedMessages) return processedMessages
+
+	return parsedProcessedMessages
+}
+
+/**
+ * Check if a message (by uid & mailbox) is already processed.
+ */
+export const getSafeImapProcessedMessageFromCookie = ({
+	event,
+	mailboxPath,
+	messageUid,
+}: {
+	event: H3Event
+	mailboxPath: MailboxPath
+	messageUid: MessageUid
+}) => {
+	const processedMessages = getSafeImapProcessedMessagesFromCookie({
+		event,
+	})
+	const mailboxMessagesSet = new Set(processedMessages[mailboxPath] || [])
+	return mailboxMessagesSet.has(messageUid)
+}
+
+/**
+ * Updates the cookie with the new processed messages uid inside a mailbox.
+ */
+export const upsertSafeImapProcessedMessages = ({
+	event,
+	mailboxPath,
+	messageUid,
+}: {
+	event: H3Event
+	mailboxPath: MailboxPath
+	messageUid: MessageUid
+}) => {
+	try {
+		const parsedProcessedMessages = getSafeImapProcessedMessagesFromCookie({
+			event,
+		})
+
+		const mailboxMessagesSet = new Set(
+			parsedProcessedMessages[mailboxPath] || []
+		)
+		mailboxMessagesSet.add(messageUid)
+		parsedProcessedMessages[mailboxPath] = [...mailboxMessagesSet]
+
+		// Set cookie
+		setCookie(
+			event,
+			cookieNames.imapProcessedMessages,
+			JSON.stringify(parsedProcessedMessages),
+			{
+				...defaultCookieParameters,
+			}
+		)
+
+		return parsedProcessedMessages
+	} catch (error) {
 		return null
 	}
 }
