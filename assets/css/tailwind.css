@@ -8,7 +8,7 @@
 	}
 
 	pre {
-		@apply bg-gray-100 p-4 text-xs;
+		@apply bg-gray-100 p-4 text-xs rounded-2xl overflow-y-auto overflow-x-scroll max-h-[40vh];
 	}
 
 	h1 {
