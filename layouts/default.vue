@@ -26,13 +26,9 @@
 <script setup lang="ts">
 	// Init user
 	const { user, setUser, setUserConfig, setDavUser } = useUser()
-	const {
-		data: userData,
-		error: userError,
-		pending: userPending,
-	} = await useLazyFetch('/api/imap/user', {
-		server: false,
-	})
+	const { data: userData, error: userError } = await useLazyFetch(
+		'/api/imap/user'
+	)
 
 	watchEffect(() => {
 		if (userError.value) {

@@ -28,8 +28,7 @@
 	import type { UserConfig } from '@/server/api/imap/config.post'
 	const { userConfig, setUserConfig } = useUser()
 	const { data: mailboxes, pending: mailboxesPending } = useFetch(
-		'/api/imap/listMailboxes',
-		{ server: false }
+		'/api/imap/listMailboxes'
 	)
 
 	const mailboxesPaths = ref<UserConfig['mailboxesPaths']>([])
