@@ -9,7 +9,7 @@
 				</div>
 
 				<div class="flex items-center gap-4">
-					<p v-if="user" class="m-0">
+					<p v-if="user" class="m-0 hidden md:block">
 						{{ user ? `Hi, ${user.username}!` : 'Unauthenticated.' }}
 					</p>
 					<button v-if="user" class="m-0" @click="handleSignOut">
@@ -19,7 +19,9 @@
 			</div>
 		</header>
 
-		<slot />
+		<div class="mx-auto max-w-3xl">
+			<slot />
+		</div>
 	</div>
 </template>
 

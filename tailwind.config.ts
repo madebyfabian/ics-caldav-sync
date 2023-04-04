@@ -4,7 +4,7 @@ export default <Partial<Config>>{
 	theme: {
 		container: {
 			center: true,
-			padding: '1.25rem',
+			padding: '1rem',
 		},
 		screens: {
 			md: '768px',
