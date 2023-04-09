@@ -9,9 +9,10 @@ import {
 const getDeepIcsChildNodes = ({
 	childNodes,
 }: {
-	childNodes: MessageStructureObject[]
+	childNodes: MessageStructureObject[] | undefined
 }) => {
 	const nodes: MessageStructureObject[] = []
+	if (!childNodes?.length) return nodes
 
 	const foundNode = childNodes.find(node =>
 		['text/calendar', 'application/ics'].includes(node.type)
@@ -68,7 +69,7 @@ export default defineEventHandler(async event => {
 					const icsAttachmentNodes = getDeepIcsChildNodes({
 						childNodes: message.bodyStructure.childNodes,
 					})
-					if (icsAttachmentNodes.length === 0) continue
+					if (!icsAttachmentNodes.length) continue
 
 					messages.push({
 						uid: message.uid,
