@@ -33,7 +33,6 @@
 	const { user, userPending, setUser, setUserConfig, setDavUser } = useUser()
 
 	watchEffect(() => {
-		console.log(userPending.value)
 		if (!userPending.value && !user.value) {
 			return navigateTo({ name: 'auth' })
 		}
