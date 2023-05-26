@@ -70,18 +70,19 @@ export default defineEventHandler(async event => {
 				// Delete event
 				try {
 					if (!calendarObject) throw new Error(`Calendar object not found`)
-					const deletedCalendarObject = await dav.deleteCalendarObject({
+					const res = await dav.deleteCalendarObject({
 						calendarObject: {
 							url: calendarObject.url,
 							etag: calendarObject.etag,
 						},
 					})
+					const deletedCalendarObject = await res.json()
 					if (deletedCalendarObject) {
 						executedAction = 'deleted'
 					}
 				} catch (error) {
 					console.error(`Failed to delete calendar object`, {
-						uid: attachment.calMeta.uid,
+						uid: attachment.calMeta,
 					})
 				} finally {
 					break
@@ -93,37 +94,41 @@ export default defineEventHandler(async event => {
 				if (calendarObject) {
 					// Update if existing
 					try {
-						const updatedCalendarObject = await dav.updateCalendarObject({
+						const res = await dav.updateCalendarObject({
 							calendarObject: {
 								url: calendarObject.url,
 								etag: calendarObject.etag,
 								data: attachment.content,
 							},
 						})
+						const updatedCalendarObject = await res.json()
 						if (updatedCalendarObject) {
 							executedAction = 'updated'
 							break
 						}
 					} catch (error) {
 						console.error(`Failed to update calendar object`, {
-							uid: attachment.calMeta.uid,
+							uid: attachment.calMeta,
 						})
 					}
 				} else {
 					// Create if not existing
 					try {
-						const createdCalendarObject = await dav.createCalendarObject({
+						const res = await dav.createCalendarObject({
 							calendar,
 							iCalString: attachment.content,
 							filename: fileName,
 						})
+
+						const createdCalendarObject = await res.json()
+
 						if (createdCalendarObject) {
 							executedAction = 'created'
 							break
 						}
 					} catch (error) {
 						console.error(`Failed to create calendar object`, {
-							uid: attachment.calMeta.uid,
+							uid: attachment.calMeta,
 						})
 					}
 				}
