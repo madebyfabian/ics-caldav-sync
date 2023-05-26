@@ -31,7 +31,7 @@ export const defaultCookieParameters: Parameters<typeof setCookie>[3] = {
 	httpOnly: true,
 	secure: true,
 	sameSite: true,
-	maxAge: 60 * 60 * 24 * 31, // 31 days
+	maxAge: 60 * 60 * 24 * 365, // 1 year
 }
 
 const safeParse = <T = unknown>(json: string) => {
